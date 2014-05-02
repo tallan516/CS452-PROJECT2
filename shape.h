@@ -23,19 +23,30 @@ class Shape
 	GLfloat *colors;
 	GLfloat *normals;
 	GLubyte *elements;
+	int vsize;
+	int csize;
+	int nsize;
+	int esize;
 	GLfloat pit=0, yaw=0;
 	glm::vec3 translate_vec;
-	int numElems;
 	public:
-		Shape(GLfloat* n, GLfloat* v, GLfloat* c, GLubyte* e);
+		Shape(GLfloat* n, GLfloat* v, GLfloat* c, GLubyte* e, int nsize, int vsize, int csize, int esize);
 	~Shape();
 	void bind_buffers();
 	void draw(GLuint program);
+	void input2(SDL_Window* window);
 };
 
-Shape::Shape(GLfloat* n, GLfloat* v, GLfloat* c, GLubyte* e)
+Shape::Shape(GLfloat* n, GLfloat* v, GLfloat* c, GLubyte* e, int nsiz, int vsiz, int csiz, int esiz)
 {
-	numElems = sizeof(e);
+	vertices = v;
+	colors = c;
+	normals = n;
+	elements = e;
+	nsize = nsiz;
+	vsize = vsiz;
+	csize = csiz;
+	esize = esiz;
 }
 
 Shape::~Shape()
@@ -55,18 +66,18 @@ void Shape::bind_buffers()
 	glBindVertexArray(vaoID);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vsize, vertices, GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, eboID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(elements), elements, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, esize, elements, GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(colors), colors, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, csize, colors, GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, vboID[2]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, nsize, normals, GL_STATIC_DRAW);
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 	glEnableVertexAttribArray(0);
@@ -84,7 +95,37 @@ void Shape::draw(GLuint program)
 	GLint tempLoc = glGetUniformLocation(program,"modelMatrix");//Matrix that handle the transformations
 	glUniformMatrix4fv(tempLoc,1,GL_FALSE,&trans[0][0]);
 	
-	glDrawElements(GL_TRIANGLES, numElems, GL_UNSIGNED_BYTE, NULL);
+	cout << esize << endl;
+	
+	glDrawElements(GL_TRIANGLES, esize, GL_UNSIGNED_BYTE, NULL);
+}
+
+void Shape::input2(SDL_Window* window)
+{
+	SDL_Event event;
+	while (SDL_PollEvent(&event))	//Handling the keyboard
+	{
+		if(event.type == SDL_QUIT)
+		{
+			exit(0);
+		}
+		else if(event.type == SDL_KEYDOWN)
+		{
+			switch(event.key.keysym.sym)
+			{
+				case SDLK_ESCAPE: exit(0);
+				case SDLK_i: pit+=2; break;
+				case SDLK_k: pit-=2; break;
+				case SDLK_j: yaw+=2; break;
+				case SDLK_l: yaw-=2; break;
+				
+				case SDLK_w: translate_vec.y+=2; break;
+				case SDLK_s: translate_vec.y-=2; break;
+				case SDLK_a: translate_vec.x-=2; break;
+				case SDLK_d: translate_vec.x+=2; break;
+			}
+		}
+	}
 }
 
 

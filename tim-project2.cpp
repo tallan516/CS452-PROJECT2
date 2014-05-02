@@ -12,13 +12,13 @@ GLuint buffer[3];
 GLuint ebuffer;
 GLuint program;
 
-glm::vec3 cubeTran;
+glm::vec3 translate_vec;
 
 GLfloat pit = 1;
 GLfloat yaw = 1;
 
-GLfloat xAccel = 0;
-GLfloat zAccel = 0;
+//GLfloat xAccel = 0;
+//GLfloat zAccel = 0;
 
 Shape *platform;
 Shape *cube;
@@ -52,9 +52,9 @@ int main(int argc, char **argv)
 
 	SDL_GLContext glcontext = SDL_GL_CreateContext(window);	//Creates opengl context associated with the window
 	glewInit();	//Initializes glew
-
+	
 	init();	//Calls function to initialize the shaders and set up buffers
-
+	
 	//Keep looping through to make sure
 	while(true)
 	{
@@ -102,11 +102,13 @@ void input(SDL_Window* window)
 				case SDLK_j: yaw+=2; break;
 				case SDLK_l: yaw-=2; break;
 				
-				case SDLK_w: cubeTran.y+=2; break;
-				case SDLK_s: cubeTran.y-=2; break;
-				case SDLK_a: cubeTran.x-=2; break;
-				case SDLK_d: cubeTran.x+=2; break;
+				case SDLK_w: translate_vec.y+=2; break;
+				case SDLK_s: translate_vec.y-=2; break;
+				case SDLK_a: translate_vec.x-=2; break;
+				case SDLK_d: translate_vec.x+=2; break;
 			}
+			cube->input2(window);
+			platform->input2(window);
 		}
 	}
 }
@@ -122,8 +124,10 @@ void init()
       program = glCreateProgram();	//Creates program
 	initShaders(program);	//Calls the initialize shader function in the header file
       
-      platform = new Shape(platform_normals, platform_vertices, platform_colors, platform_elems);
-      cube = new Shape(cube_normals, cube_vertices, cube_colors, cube_elems);
+      platform = new Shape(platform_normals, platform_vertices, platform_colors, platform_elems,
+      	sizeof(platform_normals), sizeof(platform_vertices), sizeof(platform_colors), sizeof(platform_elems));
+      cube = new Shape(cube_normals, cube_vertices, cube_colors, cube_elems,
+      	sizeof(cube_normals), sizeof(cube_vertices), sizeof(cube_colors), sizeof(cube_elems));
       
 }
 
